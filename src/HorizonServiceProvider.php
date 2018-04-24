@@ -6,7 +6,6 @@ use Illuminate\Queue\QueueManager;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Events\Dispatcher;
 use Laravel\Horizon\Connectors\RedisConnector;
-use Laravel\Horizon\Console\WorkCommand;
 
 class HorizonServiceProvider extends ServiceProvider
 {
@@ -101,7 +100,6 @@ class HorizonServiceProvider extends ServiceProvider
         $this->configure();
         $this->offerPublishing();
         $this->registerServices();
-        $this->registerQueueWorkCommand();
         $this->registerCommands();
         $this->registerQueueConnectors();
     }
@@ -135,25 +133,13 @@ class HorizonServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the command instance.
-     *
-     * @return void
-     */
-    protected function registerQueueWorkCommand()
-    {
-        $this->app->singleton(WorkCommand::class, function ($app) {
-            return new WorkCommand($app['queue.worker']);
-        });
-    }
-
-    /**
      * Register Horizon's services in the container.
      *
      * @return void
      */
     protected function registerServices()
     {
-        foreach ($this->bindings as $key => $value) {
+        foreach ($this->serviceBindings as $key => $value) {
             is_numeric($key)
                     ? $this->app->singleton($value)
                     : $this->app->singleton($key, $value);
