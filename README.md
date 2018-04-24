@@ -1,16 +1,8 @@
 ## Introduction
 
-Lumen Horizon is based on the official [Laravel Horizon](https://github.com/laravel/horizon) package.
+Based off https://github.com/servocoder/lumen-horizon - upgraded to 1.2.3 Horizon and Lumen 5.6 support
 
-It provides the same features as original package except the dashboard UI because of the Lumen nature.
-However all stats are available with Horizon [API routes](https://github.com/servocoder/lumen-horizon/blob/master/routes/web.php).
-You are free to fetch and leverage the data on your own.
-
-Alternatively, you can install another Laravel application with Horizon on the board to watch jobs and metrics of your Lumen applications.
-Yep, the Laravel Horizon dashboard will show supervisor's processes that you run with Lumen. Enjoy!
-
-Tested with **Lumen 5.5**
-
+Tested with **Lumen 5.6**
 
 ## Installation
 
@@ -21,14 +13,14 @@ Note that the package namespace remains `Laravel\Horizon`, so don't install it a
 1. Composer dependency manager:
 
 ```bash
-    composer require servocoder/lumen-horizon "~1.0"
+    composer require carsguide/lumen-horizon "~1.2"
 ```
 
 Alternatively, add the dependency directly to your composer.json file:
 
 ```
     "require": {
-        "servocoder/lumen-horizon": "~1.0"
+        "carsguide/lumen-horizon": "~1.0"
     }
 ```
 
