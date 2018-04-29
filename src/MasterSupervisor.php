@@ -205,7 +205,8 @@ class MasterSupervisor implements Pausable, Restartable, Terminable
         while (true) {
             sleep(1);
 
-            if ($loop = 600) {
+            //restart the supervisors periodically ~7mins
+            if ($loop == 400) {
                 $this->restart();
                 $loop = 0;
             }
