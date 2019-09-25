@@ -1,8 +1,8 @@
 ## Introduction
 
-Based off https://github.com/servocoder/lumen-horizon - upgraded to 1.2.3 Horizon and Lumen 5.6 support
+Based off https://github.com/servocoder/lumen-horizon - upgraded to 1.2.3 Horizon and Lumen 6.0 support
 
-Tested with **Lumen 5.6**
+Tested with **Lumen 6.0**
 
 ## Installation
 
