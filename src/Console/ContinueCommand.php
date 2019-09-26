@@ -3,6 +3,7 @@
 namespace Laravel\Horizon\Console;
 
 use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
 use Illuminate\Console\Command;
 use Laravel\Horizon\MasterSupervisor;
 use Laravel\Horizon\Contracts\MasterSupervisorRepository;
@@ -36,7 +37,7 @@ class ContinueCommand extends Command
             return Str::startsWith($master->name, MasterSupervisor::basename());
         })->all();
 
-        foreach (array_pluck($masters, 'pid') as $processId) {
+        foreach (Arr::pluck($masters, 'pid') as $processId) {
             $this->info("Sending CONT Signal To Process: {$processId}");
 
             posix_kill($processId, SIGCONT);

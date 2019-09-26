@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Laravel\Horizon\MasterSupervisor;
 use Illuminate\Support\InteractsWithTime;
+use Illuminate\Support\Arr;
 use Laravel\Horizon\Contracts\MasterSupervisorRepository;
 
 class TerminateCommand extends Command
@@ -39,7 +40,7 @@ class TerminateCommand extends Command
             return Str::startsWith($master->name, MasterSupervisor::basename());
         })->all();
 
-        foreach (array_pluck($masters, 'pid') as $processId) {
+        foreach (Arr::pluck($masters, 'pid') as $processId) {
             $this->info("Sending TERM Signal To Process: {$processId}");
 
             posix_kill($processId, SIGTERM);
