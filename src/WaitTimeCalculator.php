@@ -3,8 +3,8 @@
 namespace Laravel\Horizon;
 
 use Laravel\Horizon\Contracts\MetricsRepository;
-use Laravel\Horizon\Contracts\SupervisorRepository;
 use Illuminate\Support\Str;
+use Laravel\Horizon\Contracts\SupervisorRepository;
 use Illuminate\Contracts\Queue\Factory as QueueFactory;
 
 class WaitTimeCalculator
