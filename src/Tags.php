@@ -2,15 +2,15 @@
 
 namespace Laravel\Horizon;
 
-use stdClass;
-use ReflectionClass;
-use Illuminate\Support\Arr;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Mail\SendQueuedMailable;
-use Illuminate\Events\CallQueuedListener;
 use Illuminate\Broadcasting\BroadcastEvent;
-use Illuminate\Notifications\SendQueuedNotifications;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Events\CallQueuedListener;
+use Illuminate\Mail\SendQueuedMailable;
+use Illuminate\Notifications\SendQueuedNotifications;
+use ReflectionClass;
+use ReflectionProperty;
+use stdClass;
 
 class Tags
 {
@@ -53,8 +53,8 @@ class Tags
     protected static function tagsForListener($job)
     {
         return collect(
-            [static::extractListener($job), static::extractEvent($job),
-        ])->map(function ($job) {
+            [static::extractListener($job), static::extractEvent($job)]
+        )->map(function ($job) {
             return static::for($job);
         })->collapse()->unique()->toArray();
     }
@@ -105,10 +105,12 @@ class Tags
         $models = [];
 
         foreach ($targets as $target) {
-            $models[] = collect((new ReflectionClass($target))->getProperties())->map(function ($property) use ($target) {
+            $models[] = collect(
+                (new ReflectionClass($target))->getProperties()
+            )->map(function ($property) use ($target) {
                 $property->setAccessible(true);
 
-                $value = $property->getValue($target);
+                $value = static::getValue($property, $target);
 
                 if ($value instanceof Model) {
                     return [$value];
@@ -118,7 +120,23 @@ class Tags
             })->collapse()->filter()->all();
         }
 
-        return collect(Arr::collapse($models))->unique();
+        return collect($models)->collapse()->unique();
+    }
+
+    /**
+     * Get the value of the given ReflectionProperty.
+     *
+     * @param  \ReflectionProperty  $property
+     * @param  mixed  $target
+     */
+    protected static function getValue(ReflectionProperty $property, $target)
+    {
+        if (method_exists($property, 'isInitialized') &&
+            ! $property->isInitialized($target)) {
+            return;
+        }
+
+        return $property->getValue($target);
     }
 
     /**

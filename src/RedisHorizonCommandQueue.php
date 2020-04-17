@@ -2,8 +2,8 @@
 
 namespace Laravel\Horizon;
 
-use Laravel\Horizon\Contracts\HorizonCommandQueue;
 use Illuminate\Contracts\Redis\Factory as RedisFactory;
+use Laravel\Horizon\Contracts\HorizonCommandQueue;
 
 class RedisHorizonCommandQueue implements HorizonCommandQueue
 {
@@ -31,6 +31,7 @@ class RedisHorizonCommandQueue implements HorizonCommandQueue
      * @param  string  $name
      * @param  string  $command
      * @param  array  $options
+     * @return void
      */
     public function push($name, $command, array $options = [])
     {

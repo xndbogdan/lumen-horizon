@@ -4,6 +4,8 @@ namespace Laravel\Horizon;
 
 use Closure;
 use Exception;
+use Illuminate\Support\Facades\File;
+use RuntimeException;
 
 class Horizon
 {
@@ -41,6 +43,13 @@ class Horizon
      * @var string
      */
     public static $email;
+
+    /**
+     * Indicates if Horizon should use the dark theme.
+     *
+     * @var bool
+     */
+    public static $useDarkTheme = false;
 
     /**
      * The database configuration methods.
@@ -99,6 +108,30 @@ class Horizon
     }
 
     /**
+     * Specifies that Horizon should use the dark theme.
+     *
+     * @return static
+     */
+    public static function night()
+    {
+        static::$useDarkTheme = true;
+
+        return new static;
+    }
+
+    /**
+     * Get the default JavaScript variables for Horizon.
+     *
+     * @return array
+     */
+    public static function scriptVariables()
+    {
+        return [
+            'path' => config('horizon.path'),
+        ];
+    }
+
+    /**
      * Specify the email address to which email notifications should be routed.
      *
      * @param  string  $email
@@ -137,5 +170,23 @@ class Horizon
         static::$smsNumber = $number;
 
         return new static;
+    }
+
+    /**
+     * Determine if Horizon's published assets are up-to-date.
+     *
+     * @return bool
+     *
+     * @throws \RuntimeException
+     */
+    public static function assetsAreCurrent()
+    {
+        $publishedPath = public_path('vendor/horizon/mix-manifest.json');
+
+        if (! File::exists($publishedPath)) {
+            throw new RuntimeException('Horizon assets are not published. Please run: php artisan horizon:publish');
+        }
+
+        return File::get($publishedPath) === File::get(__DIR__.'/../public/mix-manifest.json');
     }
 }

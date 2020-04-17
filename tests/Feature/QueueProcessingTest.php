@@ -6,10 +6,10 @@ use Cake\Chronos\Chronos;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Redis;
+use Laravel\Horizon\Contracts\JobRepository;
 use Laravel\Horizon\Events\JobReserved;
 use Laravel\Horizon\Events\JobsMigrated;
 use Laravel\Horizon\Tests\IntegrationTest;
-use Laravel\Horizon\Contracts\JobRepository;
 
 class QueueProcessingTest extends IntegrationTest
 {
@@ -30,6 +30,13 @@ class QueueProcessingTest extends IntegrationTest
     public function test_pending_jobs_are_stored_in_pending_job_database()
     {
         $id = Queue::push(new Jobs\BasicJob);
+        $this->assertEquals(1, $this->recentJobs());
+        $this->assertSame('pending', Redis::connection('horizon')->hget($id, 'status'));
+    }
+
+    public function test_pending_delayed_jobs_are_stored_in_pending_job_database()
+    {
+        $id = Queue::later(1, new Jobs\BasicJob);
         $this->assertEquals(1, $this->recentJobs());
         $this->assertSame('pending', Redis::connection('horizon')->hget($id, 'status'));
     }

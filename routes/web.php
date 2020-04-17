@@ -28,8 +28,10 @@ $router->group([
     $router->get('/metrics/queues/{id}', 'QueueMetricsController@show');
 
     // Job Routes...
-    $router->get('/jobs/recent', 'RecentJobsController@index');
+    $router->get('/jobs/pending', 'PendingJobsController@index');
+    $router->get('/jobs/completed', 'CompletedJobsController@index');
     $router->get('/jobs/failed', 'FailedJobsController@index');
     $router->get('/jobs/failed/{id}', 'FailedJobsController@show');
     $router->post('/jobs/retry/{id}', 'RetryController@store');
+    $router->get('/jobs/{id}', 'JobsController@show');
 });
