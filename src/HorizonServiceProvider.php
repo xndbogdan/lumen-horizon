@@ -49,8 +49,7 @@ class HorizonServiceProvider extends ServiceProvider
     protected function registerRoutes()
     {
         $groupOptions = [
-            'domain' => config('horizon.domain', null),
-            'prefix' => config('horizon.path'),
+            'prefix' => config('horizon.path', 'horizon'),
             'namespace' => 'Laravel\Horizon\Http\Controllers',
         ];
 
