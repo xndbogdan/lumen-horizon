@@ -21,6 +21,7 @@ class HorizonServiceProvider extends ServiceProvider
     {
         $this->registerEvents();
         $this->registerRoutes();
+        $this->registerResources();
         $this->registerRedisAlias();
     }
 
@@ -60,6 +61,16 @@ class HorizonServiceProvider extends ServiceProvider
         app()->router->group($groupOptions, function ($router) {
             require __DIR__.'/../routes/web.php';
         });
+    }
+
+    /**
+     * Register the Horizon resources.
+     *
+     * @return void
+     */
+    protected function registerResources()
+    {
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'horizon');
     }
 
     /**
