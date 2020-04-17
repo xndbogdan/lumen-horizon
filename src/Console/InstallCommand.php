@@ -37,7 +37,7 @@ class InstallCommand extends Command
         $this->comment('Publishing Horizon Configuration...');
         $this->callSilent('vendor:publish', ['--tag' => 'horizon-config']);
 
-        $this->registerHorizonServiceProvider();
+//        $this->registerHorizonServiceProvider();
 
         $this->info('Horizon scaffolding installed successfully.');
     }
