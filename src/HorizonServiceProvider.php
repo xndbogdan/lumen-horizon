@@ -21,8 +21,6 @@ class HorizonServiceProvider extends ServiceProvider
     {
         $this->registerEvents();
         $this->registerRoutes();
-        $this->registerResources();
-        $this->defineAssetPublishing();
     }
 
     /**
@@ -48,36 +46,19 @@ class HorizonServiceProvider extends ServiceProvider
      */
     protected function registerRoutes()
     {
-        Route::group([
+        $groupOptions = [
             'domain' => config('horizon.domain', null),
             'prefix' => config('horizon.path'),
             'namespace' => 'Laravel\Horizon\Http\Controllers',
-            'middleware' => config('horizon.middleware', 'web'),
-        ], function () {
-            $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        ];
+
+        if ($middleware = config('horizon.middleware')) {
+            $groupOptions['middleware'] = $middleware;
+        }
+
+        app()->router->group($groupOptions, function ($router) {
+            require __DIR__.'/../routes/web.php';
         });
-    }
-
-    /**
-     * Register the Horizon resources.
-     *
-     * @return void
-     */
-    protected function registerResources()
-    {
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'horizon');
-    }
-
-    /**
-     * Define the asset publishing configuration.
-     *
-     * @return void
-     */
-    public function defineAssetPublishing()
-    {
-        $this->publishes([
-            HORIZON_PATH.'/public' => public_path('vendor/horizon'),
-        ], 'horizon-assets');
     }
 
     /**
