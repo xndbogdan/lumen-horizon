@@ -16,19 +16,6 @@ if (! function_exists('resolve')) {
     }
 }
 
-if (! function_exists('public_path')) {
-    /**
-     * Get the path to the public folder.
-     *
-     * @param  string  $path
-     * @return string
-     */
-    function public_path($path = '')
-    {
-        return app()->basePath('public').($path ? DIRECTORY_SEPARATOR.ltrim($path, DIRECTORY_SEPARATOR) : $path);
-    }
-}
-
 if (! function_exists('app_path')) {
     /**
      * Get the path to the application folder.
