@@ -34,7 +34,6 @@
     "require-dev": {
         "mockery/mockery": "^1.0",
         "phpunit/phpunit": "^9.0",
-        "orchestra/database": "^5.0",
         "orchestra/testbench": "^5.0",
         "orchestra/lumen": "^5.0",
         "laravelista/lumen-vendor-publish": "^7.0"
