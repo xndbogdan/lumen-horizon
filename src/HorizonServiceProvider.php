@@ -20,7 +20,7 @@ class HorizonServiceProvider extends ServiceProvider
     {
         $this->registerEvents();
         $this->registerRoutes();
-        $this->registerRedisAlias();
+//        $this->registerRedisAlias();
     }
 
     /**
@@ -60,17 +60,17 @@ class HorizonServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * Register redis factory.
-     *
-     * @return void
-     */
-    protected function registerRedisAlias()
-    {
-        $this->app->alias('redis', \Illuminate\Contracts\Redis\Factory::class);
-
-        $this->app->make('redis');
-    }
+//    /**
+//     * Register redis factory.
+//     *
+//     * @return void
+//     */
+//    protected function registerRedisAlias()
+//    {
+//        $this->app->alias('redis', \Illuminate\Contracts\Redis\Factory::class);
+//
+//        $this->app->make('redis');
+//    }
 
     /**
      * Register the custom queue connectors for Horizon.
