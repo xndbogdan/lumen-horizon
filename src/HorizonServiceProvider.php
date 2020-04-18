@@ -20,7 +20,7 @@ class HorizonServiceProvider extends ServiceProvider
     {
         $this->registerEvents();
         $this->registerRoutes();
-//        $this->registerRedisAlias();
+        $this->registerRedisAlias();
     }
 
     /**
@@ -46,31 +46,48 @@ class HorizonServiceProvider extends ServiceProvider
      */
     protected function registerRoutes()
     {
-        $groupOptions = [
-            'prefix' => config('horizon.uri', 'horizon'),
+//        Route::group([
+//            'domain' => config('horizon.domain', null),
+//            'prefix' => config('horizon.path'),
+//            'namespace' => 'Laravel\Horizon\Http\Controllers',
+//            'middleware' => config('horizon.middleware', 'web'),
+//        ], function () {
+//            $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+//        });
+
+//        $groupOptions = [
+//            'domain' => config('horizon.domain', null),
+//            'prefix' => config('horizon.path'),
+////            'prefix' => config('horizon.uri', 'horizon'),
+//            'namespace' => 'Laravel\Horizon\Http\Controllers',
+//            'middleware' => config('horizon.middleware', 'web'),
+//        ];
+//
+//        if ($middleware = config('horizon.middleware')) {
+//            $groupOptions['middleware'] = $middleware;
+//        }
+
+        app()->router->group([
+            'domain' => config('horizon.domain', null),
+            'prefix' => config('horizon.path'),
             'namespace' => 'Laravel\Horizon\Http\Controllers',
-        ];
-
-        if ($middleware = config('horizon.middleware')) {
-            $groupOptions['middleware'] = $middleware;
-        }
-
-        app()->router->group($groupOptions, function ($router) {
-            require __DIR__.'/../routes/web.php';
+            'middleware' => config('horizon.middleware', 'web'),
+        ], function () {
+            $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         });
     }
 
-//    /**
-//     * Register redis factory.
-//     *
-//     * @return void
-//     */
-//    protected function registerRedisAlias()
-//    {
-//        $this->app->alias('redis', \Illuminate\Contracts\Redis\Factory::class);
-//
-//        $this->app->make('redis');
-//    }
+    /**
+     * Register redis factory.
+     *
+     * @return void
+     */
+    protected function registerRedisAlias()
+    {
+        $this->app->alias('redis', \Illuminate\Contracts\Redis\Factory::class);
+
+        $this->app->make('redis');
+    }
 
     /**
      * Register the custom queue connectors for Horizon.
