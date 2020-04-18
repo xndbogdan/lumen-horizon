@@ -89,7 +89,7 @@ class JobPayload implements ArrayAccess
         return $this->set([
             'type' => $this->determineType($job),
             'tags' => $this->determineTags($job),
-            'pushedAt' => str_replace(',', '.', microtime(true)),
+            'pushedAt' => time(),
         ]);
     }
 
