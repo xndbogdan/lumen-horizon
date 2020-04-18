@@ -1,6 +1,6 @@
 ## Introduction
 
-Based off https://github.com/servocoder/lumen-horizon - upgraded to 1.2.3 Horizon and Lumen 7.0 support
+Based off https://github.com/servocoder/lumen-horizon - upgraded to Lumen Horizon 4 with Lumen 7.0 support
 
 Tested with **Lumen 7.0**
 

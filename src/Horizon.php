@@ -4,6 +4,8 @@ namespace Laravel\Horizon;
 
 use Closure;
 use Exception;
+use Illuminate\Support\Facades\File;
+use RuntimeException;
 
 class Horizon
 {
@@ -41,6 +43,13 @@ class Horizon
      * @var string
      */
     public static $email;
+
+    /**
+     * Indicates if Horizon should use the dark theme.
+     *
+     * @var bool
+     */
+    public static $useDarkTheme = false;
 
     /**
      * The database configuration methods.
@@ -96,6 +105,18 @@ class Horizon
         config(['database.redis.horizon' => array_merge($config, [
             'options' => ['prefix' => config('horizon.prefix') ?: 'horizon:'],
         ])]);
+    }
+
+    /**
+     * Specifies that Horizon should use the dark theme.
+     *
+     * @return static
+     */
+    public static function night()
+    {
+        static::$useDarkTheme = true;
+
+        return new static;
     }
 
     /**

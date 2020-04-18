@@ -2,23 +2,25 @@
 
 namespace Laravel\Horizon;
 
+use Cake\Chronos\Chronos;
 use Closure;
 use Exception;
-use Throwable;
-use Cake\Chronos\Chronos;
-use Illuminate\Support\Str;
-use Laravel\Horizon\Contracts\Pausable;
-use Laravel\Horizon\Contracts\Terminable;
-use Laravel\Horizon\Contracts\Restartable;
+use Illuminate\Contracts\Cache\Factory as CacheFactory;
 use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Support\Str;
 use Laravel\Horizon\Contracts\HorizonCommandQueue;
-use Laravel\Horizon\Events\MasterSupervisorLooped;
-use Laravel\Horizon\Contracts\SupervisorRepository;
 use Laravel\Horizon\Contracts\MasterSupervisorRepository;
-use Symfony\Component\Debug\Exception\FatalThrowableError;
+use Laravel\Horizon\Contracts\Pausable;
+use Laravel\Horizon\Contracts\Restartable;
+use Laravel\Horizon\Contracts\SupervisorRepository;
+use Laravel\Horizon\Contracts\Terminable;
+use Laravel\Horizon\Events\MasterSupervisorLooped;
+use Throwable;
 
 class MasterSupervisor implements Pausable, Restartable, Terminable
 {
+    use ListensForSignals;
+
     /**
      * The name of the master supervisor.
      *
@@ -94,9 +96,11 @@ class MasterSupervisor implements Pausable, Restartable, Terminable
      */
     public static function basename()
     {
+        $pathHash = substr(md5(__DIR__), 0, 4);
+
         return static::$nameResolver
-                        ? call_user_func(static::$nameResolver)
-                        : gethostname();
+                        ? call_user_func(static::$nameResolver).'-'.$pathHash
+                        : Str::slug(gethostname()).'-'.$pathHash;
     }
 
     /**
@@ -161,7 +165,7 @@ class MasterSupervisor implements Pausable, Restartable, Terminable
         // active supervisors so we know the maximum amount of time to wait here.
         $longest = app(SupervisorRepository::class)
             ->longestActiveTimeout();
-        
+
         $this->supervisors->each->terminate();
 
         // We will go ahead and remove this master supervisor's record from storage so
@@ -184,6 +188,10 @@ class MasterSupervisor implements Pausable, Restartable, Terminable
             sleep(1);
         }
 
+        if (config('horizon.fast_termination')) {
+            app(CacheFactory::class)->forget('horizon:terminate:wait');
+        }
+
         $this->exit($status);
     }
 
@@ -200,18 +208,8 @@ class MasterSupervisor implements Pausable, Restartable, Terminable
 
         $this->persist();
 
-        $loop = 0;
-
         while (true) {
             sleep(1);
-
-            //restart the supervisors periodically ~7mins
-            if ($loop == 400) {
-                //$this->restart();
-                $loop = 0;
-            }
-
-            $loop++;
 
             $this->loop();
         }
@@ -238,6 +236,8 @@ class MasterSupervisor implements Pausable, Restartable, Terminable
     public function loop()
     {
         try {
+            $this->processPendingSignals();
+
             $this->processPendingCommands();
 
             if ($this->working) {
@@ -247,10 +247,8 @@ class MasterSupervisor implements Pausable, Restartable, Terminable
             $this->persist();
 
             event(new MasterSupervisorLooped($this));
-        } catch (Exception $e) {
-            app(ExceptionHandler::class)->report($e);
         } catch (Throwable $e) {
-            app(ExceptionHandler::class)->report(new FatalThrowableError($e));
+            app(ExceptionHandler::class)->report($e);
         }
     }
 
@@ -286,32 +284,6 @@ class MasterSupervisor implements Pausable, Restartable, Terminable
     public function persist()
     {
         app(MasterSupervisorRepository::class)->update($this);
-    }
-
-    /**
-     * Listen for incoming process signals.
-     *
-     * @return void
-     */
-    protected function listenForSignals()
-    {
-        pcntl_async_signals(true);
-
-        pcntl_signal(SIGTERM, function () {
-            $this->terminate();
-        });
-
-        pcntl_signal(SIGUSR1, function () {
-            $this->restart();
-        });
-
-        pcntl_signal(SIGUSR2, function () {
-            $this->pause();
-        });
-
-        pcntl_signal(SIGCONT, function () {
-            $this->continue();
-        });
     }
 
     /**
