@@ -72,7 +72,7 @@ class HorizonServiceProvider extends ServiceProvider
             'prefix' => config('horizon.path'),
             'namespace' => 'Laravel\Horizon\Http\Controllers',
             'middleware' => config('horizon.middleware', 'web'),
-        ], function () {
+        ], function ($router) {
             $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         });
     }
