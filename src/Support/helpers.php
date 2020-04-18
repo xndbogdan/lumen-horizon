@@ -15,29 +15,3 @@ if (! function_exists('resolve')) {
         return app($name, $parameters);
     }
 }
-
-if (! function_exists('app_path')) {
-    /**
-     * Get the path to the application folder.
-     *
-     * @param  string  $path
-     * @return string
-     */
-    function app_path($path = '')
-    {
-        return app()->path($path);
-    }
-}
-
-if (! function_exists('config_path')) {
-    /**
-     * Get the configuration path.
-     *
-     * @param  string  $path
-     * @return string
-     */
-    function config_path($path = '')
-    {
-        return app()->configPath($path);
-    }
-}
