@@ -20,6 +20,7 @@ class HorizonServiceProvider extends ServiceProvider
     {
         $this->registerEvents();
         $this->registerRoutes();
+        $this->registerRedisAlias();
     }
 
     /**
@@ -53,6 +54,18 @@ class HorizonServiceProvider extends ServiceProvider
         ], function ($router) {
             require __DIR__ . '/../routes/web.php';
         });
+    }
+
+    /**
+     * Register redis factory.
+     *
+     * @return void
+     */
+    protected function registerRedisAlias()
+    {
+        $this->app->alias('redis', \Illuminate\Contracts\Redis\Factory::class);
+
+        $this->app->make('redis');
     }
 
     /**
