@@ -13,14 +13,14 @@ Note that the package namespace remains `Laravel\Horizon`, so don't install it a
 1. Composer dependency manager:
 
 ```bash
-    composer require carsguide/lumen-horizon "~1.2"
+    composer require carsguide/lumen-horizon "^4.0"
 ```
 
 Alternatively, add the dependency directly to your composer.json file:
 
 ```
     "require": {
-        "carsguide/lumen-horizon": "~1.0"
+        "carsguide/lumen-horizon": "^4.0"
     }
 ```
 
