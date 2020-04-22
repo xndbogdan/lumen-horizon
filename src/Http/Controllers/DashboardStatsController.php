@@ -25,6 +25,7 @@ class DashboardStatsController extends Controller
             'failedJobs' => app(JobRepository::class)->countRecentlyFailed(),
             'recentJobs' => app(JobRepository::class)->countRecent(),
             'pendingJobs' => app(JobRepository::class)->countPending(),
+            'completedJobs' => app(JobRepository::class)->countCompleted(),
             'status' => $this->currentStatus(),
             'wait' => collect(app(WaitTimeCalculator::class)->calculate())->take(1),
             'periods' => [
