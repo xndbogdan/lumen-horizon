@@ -5,10 +5,10 @@ $router->group([
     'prefix' => 'api',
 ], function ($router) {
     // Dashboard Routes...
-    $router->get('/stats', 'DashboardStatsController@index');
+    $router->get('/stats', 'DashboardStatsController@index')->name('horizon.stats.index');
 
     // Workload Routes...
-    $router->get('/workload', 'WorkloadController@index');
+    $router->get('/workload', 'WorkloadController@index')->name('horizon.workload.index');
 
     // Master Supervisor Routes...
     $router->get('/masters', 'MasterSupervisorController@index')->name('horizon.masters.index');
