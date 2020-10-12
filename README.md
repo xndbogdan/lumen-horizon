@@ -1,8 +1,8 @@
 ## Introduction
 
-Based off https://github.com/servocoder/lumen-horizon - upgraded to Lumen Horizon 4 with Lumen 7.0 support
+Based off https://github.com/servocoder/lumen-horizon - upgraded to Lumen Horizon 5 with Lumen 8.0 support
 
-Tested with **Lumen 7.0**
+Tested with **Lumen 8.0**
 
 ## Installation
 
@@ -20,7 +20,7 @@ Alternatively, add the dependency directly to your composer.json file:
 
 ```
     "require": {
-        "carsguide/lumen-horizon": "^4.0"
+        "carsguide/lumen-horizon": "^5.0"
     }
 ```
 
