@@ -77,7 +77,7 @@ class LongWaitDetected extends Notification
             ->subject(config('app.name').': Long Queue Wait Detected')
             ->greeting('Oh no! Something needs your attention.')
             ->line(sprintf(
-                 'The "%s" queue on the "%s" connection has a wait time of %s seconds.',
+                'The "%s" queue on the "%s" connection has a wait time of %s seconds.',
                 $this->longWaitQueue, $this->longWaitConnection, $this->seconds
             ));
     }
@@ -91,18 +91,18 @@ class LongWaitDetected extends Notification
     public function toSlack($notifiable)
     {
         return (new SlackMessage)
-                    ->from('Laravel Horizon')
-                    ->to(Horizon::$slackChannel)
-                    ->image('https://laravel.com/assets/img/horizon-48px.png')
-                    ->error()
-                    ->content('Oh no! Something needs your attention.')
-                    ->attachment(function ($attachment) {
-                        $attachment->title('Long Wait Detected')
-                                   ->content(sprintf(
-                                        '[%s] The "%s" queue on the "%s" connection has a wait time of %s seconds.',
-                                       config('app.name'), $this->longWaitQueue, $this->longWaitConnection, $this->seconds
-                                   ));
-                    });
+            ->from('Laravel Horizon')
+            ->to(Horizon::$slackChannel)
+            ->image('https://laravel.com/assets/img/horizon-48px.png')
+            ->error()
+            ->content('Oh no! Something needs your attention.')
+            ->attachment(function ($attachment) {
+                $attachment->title('Long Wait Detected')
+                    ->content(sprintf(
+                        '[%s] The "%s" queue on the "%s" connection has a wait time of %s seconds.',
+                        config('app.name'), $this->longWaitQueue, $this->longWaitConnection, $this->seconds
+                    ));
+            });
     }
 
     /**

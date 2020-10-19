@@ -27,6 +27,11 @@ $router->group([
     $router->get('/metrics/queues', 'QueueMetricsController@index');
     $router->get('/metrics/queues/{id}', 'QueueMetricsController@show');
 
+    // Batches Routes...
+    $router->get('/batches', 'BatchesController@index');
+    $router->get('/batches/{id}', 'BatchesController@show');
+    $router->post('/batches/retry/{id}', 'BatchesController@retry');
+
     // Job Routes...
     $router->get('/jobs/pending', 'PendingJobsController@index');
     $router->get('/jobs/completed', 'CompletedJobsController@index');

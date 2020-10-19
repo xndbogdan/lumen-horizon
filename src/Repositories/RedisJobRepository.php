@@ -2,12 +2,13 @@
 
 namespace Laravel\Horizon\Repositories;
 
-use Cake\Chronos\Chronos;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Redis\Factory as RedisFactory;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Laravel\Horizon\Contracts\JobRepository;
 use Laravel\Horizon\JobPayload;
+use Laravel\Horizon\LuaScripts;
 
 class RedisJobRepository implements JobRepository
 {
@@ -151,7 +152,7 @@ class RedisJobRepository implements JobRepository
     }
 
     /**
-     * Get a chunk of pending jobs.
+     * Get a chunk of completed jobs.
      *
      * @param  string|null  $afterIndex
      * @return \Illuminate\Support\Collection
@@ -238,7 +239,7 @@ class RedisJobRepository implements JobRepository
         $minutes = $this->minutesForType($type);
 
         return $this->connection()->zcount(
-            $type, '-inf', Chronos::now()->subMinutes($minutes)->getTimestamp() * -1
+            $type, '-inf', CarbonImmutable::now()->subMinutes($minutes)->getTimestamp() * -1
         );
     }
 
@@ -320,6 +321,8 @@ class RedisJobRepository implements JobRepository
             $this->storeJobReference($pipe, 'recent_jobs', $payload);
             $this->storeJobReference($pipe, 'pending_jobs', $payload);
 
+            $time = str_replace(',', '.', microtime(true));
+
             $pipe->hmset($payload->id(), [
                 'id' => $payload->id(),
                 'connection' => $connection,
@@ -327,12 +330,12 @@ class RedisJobRepository implements JobRepository
                 'name' => $payload->decoded['displayName'],
                 'status' => 'pending',
                 'payload' => $payload->value,
-                'created_at' => time(),
-                'updated_at' => time(),
+                'created_at' => $time,
+                'updated_at' => $time,
             ]);
 
             $pipe->expireat(
-                $payload->id(), Chronos::now()->addMinutes($this->pendingJobExpires)->getTimestamp()
+                $payload->id(), CarbonImmutable::now()->addMinutes($this->pendingJobExpires)->getTimestamp()
             );
         });
     }
@@ -347,12 +350,14 @@ class RedisJobRepository implements JobRepository
      */
     public function reserved($connection, $queue, JobPayload $payload)
     {
+        $time = str_replace(',', '.', microtime(true));
+
         $this->connection()->hmset(
             $payload->id(), [
                 'status' => 'reserved',
                 'payload' => $payload->value,
-                'updated_at' => time(),
-                'reserved_at' => time(),
+                'updated_at' => $time,
+                'reserved_at' => $time,
             ]
         );
     }
@@ -371,7 +376,7 @@ class RedisJobRepository implements JobRepository
             $payload->id(), [
                 'status' => 'pending',
                 'payload' => $payload->value,
-                'updated_at' => time(),
+                'updated_at' => str_replace(',', '.', microtime(true)),
             ]
         );
     }
@@ -397,12 +402,12 @@ class RedisJobRepository implements JobRepository
                     'name' => $payload->decoded['displayName'],
                     'status' => 'completed',
                     'payload' => $payload->value,
-                    'completed_at' => time(),
+                    'completed_at' => str_replace(',', '.', microtime(true)),
                 ]
             );
 
             $pipe->expireat(
-                $payload->id(), Chronos::now()->addMinutes($this->monitoredJobExpires)->getTimestamp()
+                $payload->id(), CarbonImmutable::now()->addMinutes($this->monitoredJobExpires)->getTimestamp()
             );
         });
     }
@@ -423,7 +428,7 @@ class RedisJobRepository implements JobRepository
                     $payload->id(), [
                         'status' => 'pending',
                         'payload' => $payload->value,
-                        'updated_at' => time(),
+                        'updated_at' => str_replace(',', '.', microtime(true)),
                     ]
                 );
             }
@@ -443,18 +448,18 @@ class RedisJobRepository implements JobRepository
             $this->updateRetryInformationOnParent($payload, $failed);
         }
 
-        $this->connection()->pipeline(function ($pipe) use ($payload, $failed) {
+        $this->connection()->pipeline(function ($pipe) use ($payload) {
             $this->storeJobReference($pipe, 'completed_jobs', $payload);
             $this->removeJobReference($pipe, 'pending_jobs', $payload);
 
             $pipe->hmset(
                 $payload->id(), [
                     'status' => 'completed',
-                    'completed_at' => time(),
+                    'completed_at' => str_replace(',', '.', microtime(true)),
                 ]
             );
 
-            $pipe->expireat($payload->id(), Chronos::now()->addMinutes($this->completedJobExpires)->getTimestamp());
+            $pipe->expireat($payload->id(), CarbonImmutable::now()->addMinutes($this->completedJobExpires)->getTimestamp());
         });
     }
 
@@ -490,8 +495,8 @@ class RedisJobRepository implements JobRepository
     {
         return collect($retries)->map(function ($retry) use ($payload, $failed) {
             return $retry['id'] === $payload->id()
-                    ? Arr::set($retry, 'status', $failed ? 'failed' : 'completed')
-                    : $retry;
+                ? Arr::set($retry, 'status', $failed ? 'failed' : 'completed')
+                : $retry;
         })->all();
     }
 
@@ -505,7 +510,7 @@ class RedisJobRepository implements JobRepository
     {
         $this->connection()->pipeline(function ($pipe) use ($ids) {
             foreach ($ids as $id) {
-                $pipe->expireat($id, Chronos::now()->addDays(7)->getTimestamp());
+                $pipe->expireat($id, CarbonImmutable::now()->addDays(7)->getTimestamp());
             }
         });
     }
@@ -520,25 +525,25 @@ class RedisJobRepository implements JobRepository
         $this->connection()->pipeline(function ($pipe) {
             $pipe->zremrangebyscore(
                 'recent_jobs',
-                Chronos::now()->subMinutes($this->recentJobExpires)->getTimestamp() * -1,
+                CarbonImmutable::now()->subMinutes($this->recentJobExpires)->getTimestamp() * -1,
                 '+inf'
             );
 
             $pipe->zremrangebyscore(
                 'recent_failed_jobs',
-                Chronos::now()->subMinutes($this->recentFailedJobExpires)->getTimestamp() * -1,
+                CarbonImmutable::now()->subMinutes($this->recentFailedJobExpires)->getTimestamp() * -1,
                 '+inf'
             );
 
             $pipe->zremrangebyscore(
                 'pending_jobs',
-                Chronos::now()->subMinutes($this->pendingJobExpires)->getTimestamp() * -1,
+                CarbonImmutable::now()->subMinutes($this->pendingJobExpires)->getTimestamp() * -1,
                 '+inf'
             );
 
             $pipe->zremrangebyscore(
                 'completed_jobs',
-                Chronos::now()->subMinutes($this->completedJobExpires)->getTimestamp() * -1,
+                CarbonImmutable::now()->subMinutes($this->completedJobExpires)->getTimestamp() * -1,
                 '+inf'
             );
         });
@@ -552,7 +557,7 @@ class RedisJobRepository implements JobRepository
     public function trimFailedJobs()
     {
         $this->connection()->zremrangebyscore(
-            'failed_jobs', Chronos::now()->subMinutes($this->failedJobExpires)->getTimestamp() * -1, '+inf'
+            'failed_jobs', CarbonImmutable::now()->subMinutes($this->failedJobExpires)->getTimestamp() * -1, '+inf'
         );
     }
 
@@ -564,7 +569,7 @@ class RedisJobRepository implements JobRepository
     public function trimMonitoredJobs()
     {
         $this->connection()->zremrangebyscore(
-            'monitored_jobs', Chronos::now()->subMinutes($this->monitoredJobExpires)->getTimestamp() * -1, '+inf'
+            'monitored_jobs', CarbonImmutable::now()->subMinutes($this->monitoredJobExpires)->getTimestamp() * -1, '+inf'
         );
     }
 
@@ -615,12 +620,12 @@ class RedisJobRepository implements JobRepository
                     'status' => 'failed',
                     'payload' => $payload->value,
                     'exception' => (string) $exception,
-                    'failed_at' => time(),
+                    'failed_at' => str_replace(',', '.', microtime(true)),
                 ]
             );
 
             $pipe->expireat(
-                $payload->id(), Chronos::now()->addMinutes($this->failedJobExpires)->getTimestamp()
+                $payload->id(), CarbonImmutable::now()->addMinutes($this->failedJobExpires)->getTimestamp()
             );
         });
     }
@@ -665,7 +670,7 @@ class RedisJobRepository implements JobRepository
         $retries[] = [
             'id' => $retryId,
             'status' => 'pending',
-            'retried_at' => Chronos::now()->getTimestamp(),
+            'retried_at' => CarbonImmutable::now()->getTimestamp(),
         ];
 
         $this->connection()->hmset($id, ['retried_by' => json_encode($retries)]);
@@ -679,9 +684,27 @@ class RedisJobRepository implements JobRepository
      */
     public function deleteFailed($id)
     {
-        $this->connection()->zrem('failed_jobs', $id);
+        return $this->connection()->zrem('failed_jobs', $id) != 1
+            ? 0
+            : $this->connection()->del($id);
+    }
 
-        $this->connection()->del($id);
+    /**
+     * Delete pending and reserved jobs for a queue.
+     *
+     * @param  string  $queue
+     * @return int
+     */
+    public function purge($queue)
+    {
+        return $this->connection()->eval(
+            LuaScripts::purge(),
+            2,
+            'recent_jobs',
+            'pending_jobs',
+            config('horizon.prefix'),
+            $queue
+        );
     }
 
     /**
