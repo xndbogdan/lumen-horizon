@@ -1,19 +1,17 @@
 ## Introduction
 
-Based off https://github.com/servocoder/lumen-horizon - upgraded to Lumen Horizon 5 with Lumen 8.0 support
-
-Tested with **Lumen 8.0**
+Based off https://github.com/servocoder/lumen-horizon - upgraded to Lumen Horizon 5 with Lumen 8.0 support.
 
 ## Installation
 
 The installation is almost the same as original package.
 
-Note that the package namespace remains `Laravel\Horizon`, so don't install it along with original one to avoid conflicts.  
+Note that the package namespace remains `Laravel\Horizon`, so don't install it along with original one to avoid conflicts.
 
 1. Composer dependency manager:
 
 ```bash
-    composer require archistarai/lumen-horizon "^4.0"
+    composer require archistarai/lumen-horizon "^5.0"
 ```
 
 Alternatively, add the dependency directly to your composer.json file:
